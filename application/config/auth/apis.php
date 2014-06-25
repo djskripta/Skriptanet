@@ -1,0 +1,7 @@
+<?php
+/**
+ * Various api credentials
+ */
+ 
+
+?>
