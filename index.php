@@ -18,7 +18,10 @@
  * NOTE: If you change these, also change the error_reporting() code below
  *
  */
-	define('ENVIRONMENT', 'development');
+
+require_once 'globals.php';
+define('ENVIRONMENT', 'development');
+
 /*
  *---------------------------------------------------------------
  * ERROR REPORTING
@@ -30,20 +33,20 @@
 
 if (defined('ENVIRONMENT'))
 {
-	switch (ENVIRONMENT)
-	{
-		case 'development':
-			error_reporting(E_ALL);
-		break;
-	
-		case 'testing':
-		case 'production':
-			error_reporting(0);
-		break;
+    switch (ENVIRONMENT)
+    {
+        case 'development':
+            error_reporting(E_ALL);
+        break;
 
-		default:
-			exit('The application environment is not set correctly.');
-	}
+        case 'testing':
+        case 'production':
+	    error_reporting(0);
+        break;
+
+        default:
+            exit('The application environment is not set correctly.');
+    }
 }
 
 /*
@@ -56,7 +59,7 @@ if (defined('ENVIRONMENT'))
  * as this file.
  *
  */
-	$system_path = 'system';
+$system_path = 'system';
 
 /*
  *---------------------------------------------------------------
@@ -72,7 +75,7 @@ if (defined('ENVIRONMENT'))
  * NO TRAILING SLASH!
  *
  */
-	$application_folder = 'application';
+$application_folder = 'application';
 
 /*
  * --------------------------------------------------------------------
@@ -134,25 +137,25 @@ if (defined('ENVIRONMENT'))
  * ---------------------------------------------------------------
  */
 
-	// Set the current directory correctly for CLI requests
-	if (defined('STDIN'))
-	{
-		chdir(dirname(__FILE__));
-	}
+// Set the current directory correctly for CLI requests
+if (defined('STDIN'))
+{
+    chdir(dirname(__FILE__));
+}
 
-	if (realpath($system_path) !== FALSE)
-	{
-		$system_path = realpath($system_path).'/';
-	}
+if (realpath($system_path) !== FALSE)
+{
+    $system_path = realpath($system_path).'/';
+}
 
-	// ensure there's a trailing slash
-	$system_path = rtrim($system_path, '/').'/';
+// ensure there's a trailing slash
+$system_path = rtrim($system_path, '/').'/';
 
-	// Is the system path correct?
-	if ( ! is_dir($system_path))
-	{
-		exit("Your system folder path does not appear to be set correctly. Please open the following file and correct this: ".pathinfo(__FILE__, PATHINFO_BASENAME));
-	}
+// Is the system path correct?
+if ( ! is_dir($system_path))
+{
+    exit("Your system folder path does not appear to be set correctly. Please open the following file and correct this: ".pathinfo(__FILE__, PATHINFO_BASENAME));
+}
 
 /*
  * -------------------------------------------------------------------
@@ -199,6 +202,7 @@ if (defined('ENVIRONMENT'))
  * And away we go...
  *
  */
+
 require_once BASEPATH.'core/CodeIgniter.php';
 
 /* End of file index.php */

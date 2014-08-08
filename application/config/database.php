@@ -45,24 +45,24 @@
 | the active record class
 */
 
-$active_group = 'default';
+$active_group = 'core';
 $active_record = TRUE;
 
-$db['default']['hostname'] = 'localhost';
-$db['default']['username'] = '';
-$db['default']['password'] = '';
-$db['default']['database'] = '';
-$db['default']['dbdriver'] = 'mysql';
-$db['default']['dbprefix'] = '';
-$db['default']['pconnect'] = TRUE;
-$db['default']['db_debug'] = TRUE;
-$db['default']['cache_on'] = FALSE;
-$db['default']['cachedir'] = '';
-$db['default']['char_set'] = 'utf8';
-$db['default']['dbcollat'] = 'utf8_general_ci';
-$db['default']['swap_pre'] = '';
-$db['default']['autoinit'] = TRUE;
-$db['default']['stricton'] = FALSE;
+$db['core']['hostname'] = 'localhost';
+$db['core']['username'] = 'core_system';
+$db['core']['password'] = '$ysAdmin*';
+$db['core']['database'] = 'moneytree';
+$db['core']['dbdriver'] = 'mysql';
+$db['core']['dbprefix'] = '';
+$db['core']['pconnect'] = FALSE;
+$db['core']['db_debug'] = TRUE;
+$db['core']['cache_on'] = FALSE;
+$db['core']['cachedir'] = '';
+$db['core']['char_set'] = 'utf8';
+$db['core']['dbcollat'] = 'utf8_general_ci';
+$db['core']['swap_pre'] = '';
+$db['core']['autoinit'] = TRUE;
+$db['core']['stricton'] = FALSE;
 
 
 /* End of file database.php */
