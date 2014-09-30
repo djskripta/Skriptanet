@@ -4,11 +4,21 @@
  * This model sets the ground rules
  */
 
+require_once BASE_PATH.'application/models/exceptions/core_exception.php';
 class Core_model extends CI_Model{
     public $database = 'moneytree';
     protected $table;
     protected $schema;
+    protected $schema_constraints;
     protected $indexes;
+    public $errors;
+    public $ready_state = self::READY_STATE_INIT;
+    
+    const READY_STATE_INIT = 0x00;
+    const READY_STATE_ERROR = 0x01;
+    const READY_STATE_VALID = 0x02;
+    const READY_STATE_FAILED = 0x04;
+    const READY_STATE_DONE = 0x08;
     
     private $global_parsers = array();
     
@@ -16,7 +26,10 @@ class Core_model extends CI_Model{
     {
         parent::__construct();	
 	$this->load->database('core');
-	
+	if(empty($this->schema)){
+            return;
+        }
+        
 	$field = new fieldSchema('created', fieldSchema::TYPE_TIMESTAMP);
 	$field->addParser('created_timestamp');
 	$this->schema[] = $field;
@@ -26,11 +39,12 @@ class Core_model extends CI_Model{
 	$field->attributes = 'ON UPDATE CURRENT_TIMESTAMP';
 	$this->schema[] = $field;
 	
+        $this->primary_key = $this->schema[0]->name;
 	$this->update_schema();
     }
     
-    public function update_schema()
-    {	
+    public function update_schema($update = true)
+    {
 	/**
 	 * Parse the fields
 	 */
@@ -45,11 +59,21 @@ class Core_model extends CI_Model{
 	 */
 	$create_query = "CREATE TABLE {$this->table} (";
 	$create_query .= implode(',',$fields);
-	$create_query .= ")";
+        
+        if(!empty($this->schema_constraints)){
+            $update = false; //for now //@TODO: allow update of schema constraints
+            $create_query .= ",\n".$this->_parse_schema_constraints();
+        }
+        
+        $create_query .= ")";
 	
 	$this->ensure_table_exists($create_query);
-	$this->ensure_column_definitions();
-	$this->ensure_indexes($create_query);
+        
+        if($update)
+        {
+            $this->ensure_column_definitions();
+            $this->ensure_indexes($create_query);
+        }
     }
     
     /**
@@ -196,8 +220,8 @@ class Core_model extends CI_Model{
     private function _get_field_string_from_schema(fieldSchema $item)
     {
 	$field_data = array();
+        $field_data[] = $item->name;
 	$field_data[] = $item->type;
-	$field_data[] = $item->name;
 	
 	if($item->null === false) $field_data[] = 'NOT NULL';
 	if(!is_null($item->extra)) $field_data[] = $item->extra;
@@ -241,17 +265,36 @@ class Core_model extends CI_Model{
      * @param array $data
      * @return array $errors
      */
-    public function validate(){
+    public function validate($update = false){
 	$errors = array();
 	foreach($this->schema as $field){
 	    foreach($field->validation as $callback){
+                if(is_array($callback[0])){
+                    $callback[0][1] = '_callback_'.$callback[0][1];
+                }
+                
 		$field_error = $this->_perform_callback($callback[0], $field->name, $callback[1]);
 		if(!empty($field_error)){
 		    $errors[$field->name][] = $field_error;
 		}
 	    }
 	}
+        
+        //always make sure the primary key is unique / valid
+        //@TODO: do this for all unique indexes
+        $label = ucwords(str_replace('_', ' ', $this->primary_key));
+        $client_data = $this->get_by_id();
+        
+        if($update && empty($client_data)){
+            $errors[$this->primary_key][] = 'Invalid '.$label;
+        } elseif(!$update && !empty($client_data)){
+            $errors[$this->primary_key][] = $label.' Already Exists';
+        }
 	
+        $this->ready_state = empty($errors) 
+                ? self::READY_STATE_VALID 
+                : self::READY_STATE_ERROR;
+        
 	return $errors;
     }
     
@@ -276,6 +319,65 @@ class Core_model extends CI_Model{
      */
     public function _map(){
         //look up and perform mapping actions
+    }
+    
+    private function _parse_schema_constraints()
+    {
+        $string_array = array();
+        foreach($this->schema_constraints as $key => $value){
+            $string_array[] = 'CONSTRAINT '.$key.' '.$value;
+        }
+        
+        return implode(",\n", $string_array);
+    }
+    
+    public function get_is_accessible($action, array $params){
+        return true;
+    }
+    
+    public function get_by_id()
+    {
+        $res = $this->db->get_where($this->table,array(
+            $this->primary_key => $this->data[$this->primary_key],
+        ));
+        
+        if($res->num_rows() > 0){
+            return $res->row_array();
+        }
+        
+        return array();
+    }
+    
+    public function insert()
+    {
+        if($this->ready_state !== self::READY_STATE_VALID){
+            throw new Exception('Data not validated', E_NOTICE);
+        }
+        
+        $this->db->insert($this->table, $this->data);
+        $this->ready_state = self::READY_STATE_DONE;
+        return $this->db->insert_id();
+    }
+    
+    public function update($where = array())
+    {
+        if($this->ready_state !== self::READY_STATE_VALID){
+            throw new Exception('Data not validated', E_NOTICE);
+        }
+        
+        $res = $this->db->where($where)
+        ->update($this->table, $this->data);
+        
+        if(!$res){
+            throw new Exception('Update Failed after Validation', E_USER_ERROR);
+        }
+        
+        if(!$this->db->affected_rows()){
+            throw new Exception('Invalid Update Condition', E_USER_ERROR);
+        }
+        
+        $this->ready_state = self::READY_STATE_DONE;
+        return true;
     }
 }
 

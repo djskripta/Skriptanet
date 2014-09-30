@@ -64,6 +64,7 @@ $db['core']['swap_pre'] = '';
 $db['core']['autoinit'] = TRUE;
 $db['core']['stricton'] = FALSE;
 
-
+//for models, etc.
+$config = $db['core'];
 /* End of file database.php */
 /* Location: ./application/config/database.php */
