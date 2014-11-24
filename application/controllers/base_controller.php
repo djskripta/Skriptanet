@@ -19,7 +19,7 @@ class Base_controller extends CI_Controller {
      * 
      * @todo Integrate with Smarty
      */
-    public function load_view($view_path, $template = null){
+    public function load_view($view_path, $template = 'basic_page'){
         //buffer the view
         ob_start();
         $this->load->view($view_path, $this->data);
@@ -30,7 +30,7 @@ class Base_controller extends CI_Controller {
             ob_start();
             $this->load->view('templates/'.$template, $this->data);
             $template_content = ob_get_clean();
-
+	    
             print str_replace('[%content%]',$content,$template_content);
             return;
         }
@@ -43,6 +43,20 @@ class Base_controller extends CI_Controller {
      */
     public function _acl(){
         
+    }
+    
+    /**
+     * Set a data attribute
+     * @todo Allow for multi-dimensional keys
+     * @param string $key
+     * @param string $value
+     */
+    public function set($key,$value){
+	$this->data[$key] = $value;
+    }
+    
+    public function set_data($data){
+	$this->data = $data;
     }
 }
 ?>

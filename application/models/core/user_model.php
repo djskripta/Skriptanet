@@ -6,23 +6,29 @@ class User_model extends Core_model{
 	$this->schema = array();
 	
 	$field = new fieldSchema('id', 'int(11)', false, 'PRI', null, 'auto_increment');
+	$field->label = 'ID';
 	$this->schema[] = $field;
 	
 	$field = new fieldSchema('identity_id', 'int(11)', false, 'MUL');
+	$field->label = 'Identity ID';
 	$this->schema[] = $field;
 	
 	$field = new fieldSchema('email', 'varchar(255)', false, 'MUL');
-	$field->addValidator('email');
-	$field->addValidator('unique');
+	$field->label = 'Email';
+	$field->addValidator('this::email');
+	$field->addValidator('this::unique');
 	$this->schema[] = $field;
 	
 	$field = new fieldSchema('password', 'varchar(255)');
-	$field->addValidator('password');
+	$field->label = 'Password';
+	$field->field_type = 'password';
+	$field->addValidator('this::password');
 	$field->addParser('blowfish_encrypt');
 	$this->schema[] = $field;
 	
 	$field = new fieldSchema('permissions', 'varchar(255)', false, null, 0);
-	$field->addValidator('valid_permissions');
+	$field->label = 'Permissions';
+	$field->addValidator('this::valid_permissions');
 	$field->addParser('permission_bit');
 	$this->schema[] = $field;
 	
@@ -34,8 +40,8 @@ class User_model extends Core_model{
         parent::__construct();
     }
     
-    public function upsert($data, coreMetaStruct $meta){
-        parent::upsert($data, $meta);
+    public function upsert(coreMetaStruct $meta){
+        parent::upsert($meta);
     }
     
     public function _filter(&$data) {
@@ -67,27 +73,27 @@ class User_model extends Core_model{
         return $callback_response;
     }
     
-    private function _callback_email($field, $data){
+    public function _callback_email($field, $data){
 	
     }
     
-    private function _callback_unique($field, $data){
+    public function _callback_unique($field, $data){
 	
     }
     
-    private function _callback_password($field, $data){
+    public function _callback_password($field, $data){
 	
     }
     
-    private function _callback_valid_permissions($field, $data){
+    public function _callback_valid_permissions($field, $data){
 	
     }
     
-    private function _callback_blowfish_encrypt($field, &$data){
+    public function _callback_blowfish_encrypt($field, &$data){
 	
     }
     
-    private function _callback_permission_bit($field, &$data){
+    public function _callback_permission_bit($field, &$data){
 	
     }
 }

@@ -11,6 +11,7 @@ class Core_model extends CI_Model{
     protected $schema;
     protected $schema_constraints;
     protected $indexes;
+    protected $unique_indexes;
     public $errors;
     public $ready_state = self::READY_STATE_INIT;
     
@@ -32,14 +33,22 @@ class Core_model extends CI_Model{
         
 	$field = new fieldSchema('created', fieldSchema::TYPE_TIMESTAMP);
 	$field->addParser('created_timestamp');
+	$field->label = 'Created';
 	$this->schema[] = $field;
 	
 	$field = new fieldSchema('updated', fieldSchema::TYPE_TIMESTAMP);
 	$field->addParser('updated_timestamp');
 	$field->attributes = 'ON UPDATE CURRENT_TIMESTAMP';
+	$field->label = 'Updated';
 	$this->schema[] = $field;
 	
         $this->primary_key = $this->schema[0]->name;
+	
+	$this->fields = array();
+	foreach($this->schema as $item){
+	    $this->fields[] = $item->name;
+	}
+	
 	$this->update_schema();
     }
     
@@ -176,11 +185,12 @@ class Core_model extends CI_Model{
 	    //add the Indexes
 	    $indexes = array();
 	    foreach($this->indexes as $name => $columns){
-		$indexes[] = "{$name} ('{$columns}')";
+		$prefix = isset($this->unique_indexes[$name]) ? 'ADD UNIQUE' : 'ADD';
+		$indexes[] = $prefix." INDEX {$name} ('{$columns}')";
 	    }
 	    
 	    $query = "ALTER TABLE {$this->table}_tmp\n";
-	    $query .= "ADD INDEX ".implode(",\n"."ADD INDEX ", $indexes)."\n";
+	    $query .= "".implode(",\n", $indexes)."\n";
 	    $this->db->query($query);
 	    
 	    //copy the data to the new table
@@ -234,7 +244,7 @@ class Core_model extends CI_Model{
     /**
      * Set the data to be processed
      */
-    public function setData(array $data){
+    public function set_data(array $data){
 	$this->data = $data;
     }
     
@@ -250,13 +260,19 @@ class Core_model extends CI_Model{
      * @param coreMetaStruct $meta
      */
     public function upsert(coreMetaStruct $meta){
-        $this->_filter();
+        $this->_filter($this->data);
         
         //ensure that the data matches the schema (attempt to convert delinquent values)
         
-        //upsert the data based on meta upsert conditions (default to id)
-        
+        //upsert the data based on meta upsert conditions (default to id)o
+	$existing_entity = $this->get_by_id();
+	if(empty($existing_entity)){
+	    $insert_id = $this->insert();
+	} else {
+	    $insert_id = $this->update();
+	}
         //return the id of the upserted entity
+	return $insert_id;
     }
     
     /**
@@ -269,8 +285,9 @@ class Core_model extends CI_Model{
 	$errors = array();
 	foreach($this->schema as $field){
 	    foreach($field->validation as $callback){
-                if(is_array($callback[0])){
-                    $callback[0][1] = '_callback_'.$callback[0][1];
+                if(substr($callback[0],0,6) == 'this::'){
+		    $callback[0] = substr($callback[0],6);
+		    $callback[0] = array(&$this, '_callback_'.$callback[0]);
                 }
                 
 		$field_error = $this->_perform_callback($callback[0], $field->name, $callback[1]);
@@ -335,8 +352,41 @@ class Core_model extends CI_Model{
         return true;
     }
     
+    public function get_schema(){
+	return $this->schema;
+    }
+    
+    public function get($where = array(), $limit = 10, $order_by = 'id DESC'){
+	$where_strings = array();
+	foreach($where as $key => $value){
+	    $operator = '=';
+	    
+	    if(strstr($key,' ')){
+		$key_parts = explode(' ',$key);
+		$key = array_shift($key_parts);
+		$operator = array_shift($key_parts);
+	    }
+	    
+	    $key = $this->db->escape($key);
+	    $where_strings[] = "{$key} {$operator} '{$this->db->escape($value)}'";
+	}
+	
+	$fields = implode(',', $this->fields);
+	$where = implode("\nAND",$where_strings);
+	
+	return $this->db->query("SELECT {$fields} "
+	. "FROM {$this->table} "
+	. (!empty($where) ? "WHERE {$where} " : "")
+	. "ORDER BY {$order_by} "
+	. "LIMIT {$limit}")->result_array;
+    }
+    
     public function get_by_id()
     {
+	if(!isset($this->data[$this->primary_key])){
+	    return array();
+	}
+	
         $res = $this->db->get_where($this->table,array(
             $this->primary_key => $this->data[$this->primary_key],
         ));
@@ -364,6 +414,14 @@ class Core_model extends CI_Model{
         if($this->ready_state !== self::READY_STATE_VALID){
             throw new Exception('Data not validated', E_NOTICE);
         }
+	
+	if(empty($where)){
+	    if(!isset($this->data[$this->primary_key])){
+		throw new Exception('No condition set for update');
+	    }
+	    
+	    $where = array($this->primary_key => $this->data[$this->primary_key]);
+	}
         
         $res = $this->db->where($where)
         ->update($this->table, $this->data);
@@ -383,9 +441,10 @@ class Core_model extends CI_Model{
 
 /**
  * This class is a dependency of the core model
+ * For fetching the object by id and performing checks against available data
  */
 class coreMetaStruct{
-    public $name;
+    public $db_validators = array();
 }
 
 class callbackResponseStruct{
@@ -405,6 +464,7 @@ class fieldSchema{
     
     public $name;
     public $type;
+    public $field_type = 'text';
     public $null;
     public $key;
     public $default;
@@ -413,6 +473,12 @@ class fieldSchema{
     public $validation = array();
     public $parsers = array();
     public $triggers = array();
+    public $db_links = array();
+    
+    /**
+     * Form Stuff
+     */
+    public $label;
     
     public function __construct(
 	$name, 
@@ -440,5 +506,9 @@ class fieldSchema{
     
     public function addTrigger($callback, $params = array()){
 	$this->triggers[] = array($callback, $params);
+    }
+    
+    public function addDbLink($table, $key){
+	$this->db_links[$table] = $key;
     }
 }

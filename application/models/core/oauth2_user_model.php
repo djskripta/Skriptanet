@@ -16,11 +16,11 @@ class Oauth2_user_model extends Core_model
         $this->schema = array();
         
         $field = new fieldSchema('client_id', 'VARCHAR(80)', false);
-        $field->addValidator(array(&$this, 'auth_credential'));
+        $field->addValidator('this::auth_credential');
 	$this->schema[] = $field;
         
         $field = new fieldSchema('client_secret', 'VARCHAR(80)', false);
-        $field->addValidator(array(&$this, 'auth_credential'));
+        $field->addValidator('this::auth_credential');
 	$this->schema[] = $field;
         
         $field = new fieldSchema('redirect_uri ', 'VARCHAR(200)', false);

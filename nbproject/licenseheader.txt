@@ -1,0 +1,8 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}@company SkriptaNet
+${licensePrefix}@author Nikita Nikitin
+<#if licenseLast??>
+${licenseLast}
+</#if>
