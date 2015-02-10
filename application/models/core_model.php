@@ -5,6 +5,8 @@
  */
 
 require_once BASE_PATH.'application/models/exceptions/core_exception.php';
+require_once BASE_PATH.'application/helpers/core_model_helper.php';
+
 class Core_model extends CI_Model{
     public $database = 'moneytree';
     protected $table;
@@ -12,6 +14,9 @@ class Core_model extends CI_Model{
     protected $schema_constraints;
     protected $indexes;
     protected $unique_indexes;
+    public $update_mode = false;
+    public $data = array(); //data we are processing
+    public $entity = array(); //the current data
     public $errors;
     public $ready_state = self::READY_STATE_INIT;
     
@@ -25,19 +30,19 @@ class Core_model extends CI_Model{
     
     public function __construct()
     {
-        parent::__construct();	
+        parent::__construct();
 	$this->load->database('core');
 	if(empty($this->schema)){
             return;
         }
         
 	$field = new fieldSchema('created', fieldSchema::TYPE_TIMESTAMP);
-	$field->addParser('created_timestamp');
+	$field->addParser('this::created_timestamp');
 	$field->label = 'Created';
 	$this->schema[] = $field;
 	
 	$field = new fieldSchema('updated', fieldSchema::TYPE_TIMESTAMP);
-	$field->addParser('updated_timestamp');
+	$field->addParser('this::updated_timestamp');
 	$field->attributes = 'ON UPDATE CURRENT_TIMESTAMP';
 	$field->label = 'Updated';
 	$this->schema[] = $field;
@@ -50,6 +55,16 @@ class Core_model extends CI_Model{
 	}
 	
 	$this->update_schema();
+    }
+    
+    public function _callback_created_timestamp($field, $data){
+	if(empty($data[$field]) && !$this->update_mode){
+	    return date('Y-m-d H:i:s');
+	}
+    }
+    
+    public function _callback_updated_timestamp($field, $data){
+	return date('Y-m-d H:i:s');
     }
     
     public function update_schema($update = true)
@@ -248,8 +263,15 @@ class Core_model extends CI_Model{
 	$this->data = $data;
     }
     
+    /**
+     * Set the primary key
+     */
+    public function set_id($id){
+	$this->data[$this->primary_key] = $id;
+    }
+    
     private function _perform_callback($callback, $field_name, $params){
-	array_unshift($params,$this->data[$field_name],$this->data);
+	array_unshift($params,$field_name,$this->data);
 	return call_user_func_array($callback, $params);
     }
     
@@ -264,7 +286,7 @@ class Core_model extends CI_Model{
         
         //ensure that the data matches the schema (attempt to convert delinquent values)
         
-        //upsert the data based on meta upsert conditions (default to id)o
+        //upsert the data based on meta upsert conditions (default to id)
 	$existing_entity = $this->get_by_id();
 	if(empty($existing_entity)){
 	    $insert_id = $this->insert();
@@ -283,14 +305,14 @@ class Core_model extends CI_Model{
      */
     public function validate($update = false){
 	$errors = array();
+	$orig_update_mode = $this->update_mode;
+	$this->update_mode = $update;
+	
 	foreach($this->schema as $field){
+	    if($update && $field->ignore_blank_on_update) continue;
+	    
 	    foreach($field->validation as $callback){
-                if(substr($callback[0],0,6) == 'this::'){
-		    $callback[0] = substr($callback[0],6);
-		    $callback[0] = array(&$this, '_callback_'.$callback[0]);
-                }
-                
-		$field_error = $this->_perform_callback($callback[0], $field->name, $callback[1]);
+                $field_error = $this->_handle_config_callback($callback, $field);
 		if(!empty($field_error)){
 		    $errors[$field->name][] = $field_error;
 		}
@@ -312,6 +334,7 @@ class Core_model extends CI_Model{
                 ? self::READY_STATE_VALID 
                 : self::READY_STATE_ERROR;
         
+	$this->update_mode = $orig_update_mode;
 	return $errors;
     }
     
@@ -323,12 +346,37 @@ class Core_model extends CI_Model{
      */
     public function _filter(){
         //follow any defined filter callbacks
-        foreach($this->schema as $field){
+        foreach($this->schema as $field){	    
+	    if(isset($this->data[$this->primary_key]) && $field->ignore_blank_on_update && empty($this->data[$field->name])){
+		unset($this->data[$field->name]);
+		continue;
+	    }
+	    
 	    $parsers = $this->global_parsers + $field->parsers;
+	    
 	    foreach($parsers as $callback){
-		$this->_perform_callback($callback[0], $field->name, $callback[1]);
+		$res = $this->_handle_config_callback($callback, $field);
+		if(empty($res)) continue;
+		
+		$this->data[$field->name] = $res;
 	    }
 	}
+    }
+    
+    /**
+     * Parse a callback from a model's config and run it
+     * 
+     * @param type $callback
+     * @param type $field
+     * @return mixed
+     */
+    private function _handle_config_callback($callback, $field){
+	if(substr($callback[0],0,6) == 'this::'){
+	    $callback[0] = substr($callback[0],6);
+	    $callback[0] = array(&$this, '_callback_'.$callback[0]);
+	}
+
+	return $this->_perform_callback($callback[0], $field->name, $callback[1]);
     }
     
     /**
@@ -367,8 +415,8 @@ class Core_model extends CI_Model{
 		$operator = array_shift($key_parts);
 	    }
 	    
-	    $key = $this->db->escape($key);
-	    $where_strings[] = "{$key} {$operator} '{$this->db->escape($value)}'";
+	    $key = substr($this->db->escape($key),1,-1);
+	    $where_strings[] = "{$key} {$operator} {$this->db->escape($value)}";
 	}
 	
 	$fields = implode(',', $this->fields);
@@ -378,11 +426,12 @@ class Core_model extends CI_Model{
 	. "FROM {$this->table} "
 	. (!empty($where) ? "WHERE {$where} " : "")
 	. "ORDER BY {$order_by} "
-	. "LIMIT {$limit}")->result_array;
+	. "LIMIT {$limit}")->result_array();
     }
     
     public function get_by_id()
     {
+	$this->entity = array();
 	if(!isset($this->data[$this->primary_key])){
 	    return array();
 	}
@@ -392,7 +441,8 @@ class Core_model extends CI_Model{
         ));
         
         if($res->num_rows() > 0){
-            return $res->row_array();
+	    $this->entity = $res->row_array();
+            return $this->entity;
         }
         
         return array();
@@ -435,80 +485,16 @@ class Core_model extends CI_Model{
         }
         
         $this->ready_state = self::READY_STATE_DONE;
-        return true;
-    }
-}
-
-/**
- * This class is a dependency of the core model
- * For fetching the object by id and performing checks against available data
- */
-class coreMetaStruct{
-    public $db_validators = array();
-}
-
-class callbackResponseStruct{
-    public $status = 1;
-    public $errors = array();
-    public $data; //can be any kind of struct or an array (arrays for lazy developers)
-}
-
-/**
- * Used to track properties and callbacks for database fields
- */
-class fieldSchema{
-    const TYPE_PRIMARY_KEY = 'primary_key';
-    const TYPE_INT = 'int(11)';
-    const TYPE_VARCHAR = 'varchar(255)';
-    const TYPE_TIMESTAMP = 'datetime';
-    
-    public $name;
-    public $type;
-    public $field_type = 'text';
-    public $null;
-    public $key;
-    public $default;
-    public $extra;
-    public $attributes = '';
-    public $validation = array();
-    public $parsers = array();
-    public $triggers = array();
-    public $db_links = array();
-    
-    /**
-     * Form Stuff
-     */
-    public $label;
-    
-    public function __construct(
-	$name, 
-	$type, 
-	$null = false, 
-	$key = null, 
-	$default = null, 
-	$extra = null
-    ){
-	$this->name = $name;
-	$this->type = $type;
-	$this->null = $null;
-	$this->key = $key;
-	$this->default = $default;
-	$this->extra = $extra;
+        return $this->data[$this->primary_key];
     }
     
-    public function addValidator($callback, $params = array()){
-	$this->validation[] = array($callback, $params);
-    }
-    
-    public function addParser($callback, $params = array()){
-	$this->parsers[] = array($callback, $params);
-    }
-    
-    public function addTrigger($callback, $params = array()){
-	$this->triggers[] = array($callback, $params);
-    }
-    
-    public function addDbLink($table, $key){
-	$this->db_links[$table] = $key;
+    public function _callback_unique($field, $data)
+    {
+	if($this->update_mode && $data[$field] == $this->entity[$field]) return;
+	
+	$users = $this->get(array($field => $data[$field]));
+	if(!empty($users)){
+	    return 'A '.$this->name.' with this '.$field.' already exists';
+	}
     }
 }

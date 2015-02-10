@@ -27,6 +27,9 @@ class Migration_Setup_tables extends CI_Migration {
 		));
 
 		$this->dbforge->create_table('blog');
+		
+		$this->load->library('cimongo/Cimongo');
+		$this->cimongo->switch_db('skriptanet');
 	}
 
 	public function down(){

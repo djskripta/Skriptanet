@@ -1,7 +1,85 @@
+html{
+  height: 100%;
+}
+
+body{
+  min-width:100%;
+  min-height: 100%;
+  display:table;
+}
+
 h1{
     margin-bottom:10px;
 }
 
 div#container{
     padding:4px 20px;
+    width:100%;
+    min-height:100%;
+}
+
+div#container, header, footer{
+    display:table-row;
+}
+
+div#container:before, div#container:after{
+    content:initial;
+}
+
+div#container > div, header > div, footer > div{
+    display:table-cell;
+    width:100%;
+}
+
+body > header, body > footer{
+    background-color:#c0c0c0;
+    width:100%;
+}
+
+form label{
+    min-width:50px;
+}
+
+@media (max-width: 768px){
+    body > header > .nav, body > footer > .nav{
+        padding:3px 4px;
+        height:30px;
+    }
+    
+    div#container > div.wrapper{
+        padding:2px 24px;
+    }
+}
+
+@media (min-width: 768px){
+    body > header > .nav, body > footer > .nav{
+        padding:4px 6px;
+        height:36px;
+    }
+    
+    div#container > div.wrapper{
+        padding:3px 30px;
+    }
+}
+
+@media (min-width: 992px){
+    body > header > .nav, body > footer > .nav{
+        padding:5px 8px;
+        height:40px;
+    }
+    
+    div#container > div.wrapper{
+        padding:4px 36px;
+    }
+}
+
+@media (min-width: 1200px){
+    body > header > .nav, body > footer > .nav{
+        padding:5px 8px;
+        height:40px;
+    }
+    
+    div#container > div.wrapper{
+        padding:6px 40px;
+    }
 }

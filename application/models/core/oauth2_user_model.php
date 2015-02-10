@@ -43,6 +43,6 @@ class Oauth2_user_model extends Core_model
     }
     
     public function _callback_auth_credential($field, $data){
-        return preg_match('/^[\s\w]{4,16}/ui',$field);
+        return preg_match('/^[\s\w]{4,16}/ui',$data[$field]);
     }
 }
