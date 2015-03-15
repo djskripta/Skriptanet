@@ -28,7 +28,7 @@ class fieldSchema{
     const TYPE_TIMESTAMP = 'datetime';
     
     public $name;
-    public $type;
+    public $type = 'varchar(255)';
     public $field_type = 'text';
     public $editable = true;
     public $ignore_blank_on_update = false;

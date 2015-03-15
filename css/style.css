@@ -15,6 +15,7 @@ h1{
 div#container{
     padding:4px 20px;
     width:100%;
+    height:100%;
     min-height:100%;
 }
 
@@ -33,53 +34,646 @@ div#container > div, header > div, footer > div{
 
 body > header, body > footer{
     background-color:#c0c0c0;
+    border-color:#3f6c9c;
     width:100%;
+}
+
+body > header > .nav , body > footer > .nav{
+    border-color:#3f6c9c;
+}
+
+body > header > .nav{
+    border-bottom-width:4px;
+    border-bottom-style:solid;
+}
+
+body > header > .nav .glyphicon, body > header > .nav > ul{
+    height:100%;
+}
+
+body > footer > .nav{
+    border-top-width:2px;
+    border-top-style:solid;
+}
+
+#container form{
+    margin-bottom:16px;
+    margin-top:16px;
 }
 
 form label{
     min-width:50px;
 }
 
-@media (max-width: 768px){
+textarea{
+    margin-bottom:-3px;
+}
+
+.nav .info{
+    font-family:"Arial";
+    font-size:14px;
+    position:relative;
+    top:-12px;
+    padding-right:4px;
+}
+
+.glyphicon-option-vertical:after{
+    content:"\e235";
+}
+
+.glyphicon-option-vertical:before{
+    content:"";
+}
+
+.row h2{
+    margin-top:0px;
+}
+
+.row.top *, .row > [class*="col-"]:not(:first-of-type){
+    -ms-word-break:break-all;
+    word-break:break-all;
+    -webkit-hyphens:auto;
+    -moz-hyphens:auto;
+    hyphens:auto;
+}
+
+.row.top .nav > li > a {
+    padding:4px 8px;
+}
+
+.wrapper .row{
+    margin-left:0px;
+    margin-right:0px;
+}
+
+.row.top{
+    padding-bottom:4px;
+    margin-bottom:16px;
+    margin-left:0px;
+    margin-right:0px;
+}
+
+.row.top:first-of-type{
+    border-top:0px none;
+    border-bottom:0px none;
+    margin-top:16px;
+    padding-top:0px;
+}
+
+.row.top h2{
+    margin-bottom:0px;
+    padding-top:1px;
+}
+
+.row.top > [class*="col-"]:first-of-type{
+    padding-left:0px;
+}
+
+.row.top ul.navbar-nav{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    display:block;
+}
+
+.row.top ul.navbar-nav > li{
+    display:inline-block;
+    margin-left:0px;
+    float:none;
+}
+
+.row.table-row{
+    margin-top:0px;
+    padding-top:16px;
+    margin-bottom:8px;
+}
+
+:not(form) > .row.table-row:last-of-type{
+    margin-bottom:16px;
+}
+
+form > .row.table-row{
+    padding-top:0px;
+}
+
+:not(form) > .row.table-row{
+    border:2px solid #3f6c9c;
+    -webkit-border-radius:12px;
+    -moz-border-radius:12px;
+    border-radius:12px;
+}
+
+form{
+    -webkit-border-radius:12px;
+    -moz-border-radius:12px;
+    border-radius:12px;
+}
+
+form > .row > [class*="col-"] input,
+form > .row > [class*="col-"] textarea{
+    border-style:ridge;
+}
+
+body > header > .nav h1{
+    margin:0px;
+    margin-left:8px;
+}
+
+header .navbar-nav > li > a{
+    padding:0px;
+}
+
+header > .nav > *{
+    margin:0px;
+}
+
+.navbar-right{
+    margin-right:0px; /* this is a custom override */
+}
+
+header > .nav .btn-group > .btn{
+    padding:0px;
+}
+
+@media (max-width:768px){
+    /* always use these styles - bootstrap only does this for min-width:768px */
+    .navbar-right{
+        float:right;
+        margin-right:0px; /* this is a custom override */
+    }
+
+    header .navbar-nav > li{
+        float:left;
+    }
+}
+
+@media (max-width: 560px){
+    * > .row:first-of-type > [class*="col-"] label, 
+    * > .row > [class*="col-"]:first-of-type > *:first-child{
+        -webkit-border-top-left-radius:12px;
+        -moz-border-top-left-radius:12px;
+        border-top-left-radius:12px;
+        -webkit-border-top-right-radius:12px;
+        -moz-border-top-right-radius:12px;
+        border-top-right-radius:12px;
+    }
+
+    * > .row:last-of-type > [class*="col-"]:last-of-type,
+    * > .row:last-of-type > [class*="col-"]:last-of-type > *:first-child{
+        -webkit-border-bottom-left-radius:12px;
+        -moz-border-bottom-left-radius:12px;
+        border-bottom-left-radius:12px;
+        -webkit-border-bottom-right-radius:12px;
+        -moz-border-bottom-right-radius:12px;
+        border-bottom-right-radius:12px;
+        
+        -webkit-border-top-left-radius:4px;
+        -moz-border-top-left-radius:4px;
+        border-top-left-radius:4px;
+        -webkit-border-top-right-radius:4px;
+        -moz-border-top-right-radius:4px;
+        border-top-right-radius:4px;
+        border-top-width:4px;
+    }
+    
+    form > .row:last-of-type > [class*="col-"]:first-of-type > *:first-child{
+        display:none;
+    }
+    
+    * > .row > [class*="col-"]:last-of-type > *:first-child{
+        -webkit-border-bottom-left-radius:12px;
+        -moz-border-bottom-left-radius:12px;
+        border-bottom-left-radius:12px;
+        -webkit-border-bottom-right-radius:12px;
+        -moz-border-bottom-right-radius:12px;
+        border-bottom-right-radius:12px;
+    }
+    
+    form > .row:not(:last-of-type) > [class*="col-"]:last-of-type > *:first-child{
+        padding:4px 10px;
+    }
+    
+    * > .row:nth-last-of-type(2) > [class*="col-"]:last-of-type > *:first-child{
+        -webkit-border-bottom-left-radius:4px;
+        -moz-border-bottom-left-radius:4px;
+        border-bottom-left-radius:4px;
+        -webkit-border-bottom-right-radius:4px;
+        -moz-border-bottom-right-radius:4px;
+        border-bottom-right-radius:4px;
+        border-bottom-width:2px;
+        border-bottom-color:#cfcfcf;
+    }
+}
+
+@media (min-width: 561px){
+    form > .row > [class*="col-"] input,
+    form > .row > [class*="col-"] textarea{
+        -webkit-border-radius:4px;
+        -moz-border-radius:4px;
+        border-radius:4px;
+        padding: 4px 10px;
+    }
+    
+    form > .row:first-of-type > [class*="col-"] label{
+        -webkit-border-top-left-radius:12px;
+        -moz-border-top-left-radius:12px;
+        border-top-left-radius:12px;
+    }
+    
+    form > .row:first-of-type > [class*="col-"]:last-of-type,
+    form > .row:first-of-type > [class*="col-"]:last-of-type > *:first-of-type{
+        -webkit-border-top-right-radius:12px;
+        -moz-border-top-right-radius:12px;
+        border-top-right-radius:12px;
+    }
+    
+    form > .row:last-of-type > [class*="col-"]:last-of-type,
+    form > .row:last-of-type > [class*="col-"]:last-of-type > *:first-child{
+        -webkit-border-bottom-right-radius:12px;
+        -moz-border-bottom-right-radius:12px;
+        border-bottom-right-radius:12px;
+    }
+    
+    form > .row:last-of-type > [class*="col-"] label{
+        -webkit-border-bottom-left-radius:12px;
+        -moz-border-bottom-left-radius:12px;
+        border-bottom-left-radius:12px;
+    }
+}
+
+form > .row.table-row > [class*="col-"]:not(:first-of-type){
+    padding:10px;
+    border:1px solid #ccc;
+    border-left:0px none;
+    border-bottom:0px none;
+}
+
+form > .row.table-row:last-of-type > [class*="col-"]:not(:first-of-type){
+    border-bottom:1px solid #ccc;
+}
+
+form > .row.table-row > [class*="col-"]:nth-child(2){
+    //margin-left:6px;
+}
+
+:not(.row) + .row:not(:first-of-type){
+    margin-top:20px;
+    padding-top:16px;
+    //border-top: 1px dotted #000;
+}
+
+:not(form) > .row.table-row:nth-child(even){
+    background: #EEE;
+}
+
+:not(form) > .row.table-row:nth-child(odd){
+    background: #CCC;
+}
+
+:not(form) > div.table-row[data-href]:hover{
+    background-color:#9acfea !important;
+    cursor:pointer;
+}
+
+header > .nav a{
+    color:#333;
+}
+
+a.glyphicon:hover{
+    text-decoration:none;
+}
+
+header > .nav a:hover{
+    background-color:#ccc;
+}
+
+@media (max-width: 400px){
+    h2{
+        font-size:24px;
+        padding-top:3px;
+    }
+
+    :not(.row.top) > [class*="col-"]{
+        width:100%;
+    }
+
+    [class*="col-"] > label{
+        border-bottom-width:1px;
+    }
+
+    [class*="col-"] input, [class*="col-"] textarea{
+        width:100%;
+    }
+    
+    :not(form) > .row.table-row > [class*="col-"]{
+        //text-align:center;
+        font-size:14px;
+    }
+
+    :not(form) > .row.table-row > [class*="col-"]:not(:first-of-type){
+        //margin-top:10px;
+    }
+
+    .row > [class*="col-"] ul.nav{
+        padding:0px 16px;
+    }
+    
+    .row.top > [class*="col-"]{
+        padding-left:0px;
+        padding-right:0px;
+    }
+    
+    .row.top:first-of-type{
+        margin-top:12px;
+        margin-bottom:12px;
+        padding-bottom:12px;
+    }
+}
+
+@media (max-width: 360px){
+    h4{
+        font-size:14px;
+        font-weight:bold;
+        margin:0px;
+    }
+    
+    h2{
+        font-size:20px;
+        padding-top:4px;
+    }
+    
+    :not(form) > .row.table-row .btn {
+        padding: 2px 4px;
+        font-size: 13px;
+        margin-top:-6px;
+    }
+}
+
+@media (max-width: 480px){
+    h4{
+        font-size:14px;
+        font-weight:bold;
+        margin:0px;
+    }
+    
+    :not(form) > .row.table-row .btn {
+        padding: 2px 4px;
+        font-size: 13px;
+        margin-top:-6px;
+    }
+}
+
+@media (max-width: 420px){
+    h4{
+        font-size:13px;
+    }
+}
+
+@media (min-width: 401px){
+    .row.top ul.navbar-nav > li{
+        margin-left:4px;
+    }
+
+    .row.top .nav > li > .glyphicon{
+        font-size:21px;
+        padding:6px 8px;
+    }
+}
+
+@media (max-width: 560px){
+    .wrapper *{
+        -webkit-box-sizing:border-box;
+        -moz-box-sizing:border-box;
+        box-sizing:border-box;
+    }
+    
     body > header > .nav, body > footer > .nav{
+        padding:0px;
+        height:26px;
+    }
+    
+    body > header > .nav .glyphicon{
         padding:3px 4px;
-        height:30px;
     }
     
     div#container > div.wrapper{
         padding:2px 24px;
     }
+    
+    .glyphicon{
+        font-size:20px;
+    }
+    
+    header .glyphicon-option-vertical{
+        font-size:22px;
+    }
+    
+    body > header > .nav h1{
+        margin-top:5px;
+        font-size:16px;
+    }
+    
+    .nav .info{
+        top:-2px;
+    }
+    
+    form *{
+        -webkit-box-sizing:border-box;
+        -moz-box-sizing:border-box;
+        box-sizing:border-box;
+    }
+    
+    form > .row.table-row:last-of-type .btn{
+        margin:10px;
+    }
+    
+    * > .row.table-row > [class*="col-"]{
+        float:left !important;
+        border-right:0px none;
+        width:100%;
+        padding-right:0px;
+        padding-left:0px;
+    }
+    
+    form > .row.table-row > [class*="col-"]:not(:first-of-type){
+        padding:0px;
+        border:0px none !important;
+    }
+    
+    form > .row.table-row > [class*="col-"]:not(:first-of-type){
+        padding:0px;
+        margin-bottom:10px;
+    }
+    
+    * > .row:nth-last-of-type(2) > [class*="col-"]:last-of-type{
+        margin-bottom:6px;
+        border:0px none;
+    }
+    
+    * > .row.table-row:last-of-type > [class*="col-"]:not(:first-of-type){
+        border-bottom:0px none;
+    }
+    
+    form > .row.table-row:last-of-type > [class*="col-"]:not(:first-of-type){
+        border-left:1px solid rgb(169, 169, 169);
+        border-right:1px solid rgb(169, 169, 169);
+    }
+    
+    form > .row.table-row:last-of-type > [class*="col-"]:last-of-type{
+        border-bottom:1px solid rgb(169, 169, 169);
+        margin-bottom:0px;
+    }
+    
+    form > .row.table-row:last-of-type .btn{
+        margin:0px;
+        width:100%;
+    }
+    
+    *:not(form) > .row.table-row > [class*="col-"]{
+        padding:0px 10px;
+    }
+    
+    *:not(form) > .row.table-row > [class*="col-"]:not(:first-of-type){
+        padding:0px 10px;
+        margin-top:10px;
+        margin-bottom:10px;
+    }
+    
+    *:not(form) > .row.table-row > [class*="col-"]:first-of-type{
+        margin-top:10px;
+    }
+    
+    *:not(form) > .row.table-row{
+        padding:0px;
+    }
+}
+
+@media (max-width: 475px) and (min-width: 401px){
+    .btn{
+        //width:100%;
+        -webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	box-sizing:border-box;
+    }
+}
+
+@media (min-width: 561px){
+    body > header > .nav, body > footer > .nav{
+        padding:0px;
+        height:30px;
+    }
+   
+    body > header > .nav .glyphicon{
+        padding:3px 4px;
+    }
+    
+    body > header > .nav h1{
+        margin-top:6px;
+        font-size:18px;
+    }
+    
+    div#container > div.wrapper{
+        padding:2px 24px;
+    }
+    
+    header .glyphicon{
+        font-size:26px;
+    }
+    
+    header .glyphicon-option-vertical{
+        font-size:28px;
+    }
+    
+    .nav .info{
+        top:-2px;
+        font-size:16px;
+    }
 }
 
 @media (min-width: 768px){
     body > header > .nav, body > footer > .nav{
-        padding:4px 6px;
+        padding:0px;
         height:36px;
+    }
+    
+    body > header > .nav .glyphicon{
+        padding:1px 6px;
+    }
+    
+    body > header > .nav h1{
+        margin-top:8px;
+        font-size:20px;
     }
     
     div#container > div.wrapper{
         padding:3px 30px;
     }
+    
+    header .glyphicon{
+        font-size:32px;
+    }
+    
+    header .glyphicon-option-vertical{
+        font-size:34px;
+    }
+    
+    .nav .info{
+        top:-2px;
+        font-size:18px;
+    }
 }
 
 @media (min-width: 992px){
     body > header > .nav, body > footer > .nav{
-        padding:5px 8px;
+        padding:0px;
         height:40px;
+    }
+    
+    body > header > .nav .glyphicon{
+        padding:5px 8px;
+    }
+    
+    body > header > .nav h1{
+        margin-top:11px;
+        font-size:22px;
     }
     
     div#container > div.wrapper{
         padding:4px 36px;
     }
+    
+    header .glyphicon{
+        font-size:36px;
+    }
+    
+    header .glyphicon-option-vertical{
+        font-size:38px;
+    }
+    
+    .nav .info{
+        top:-2px;
+        font-size:20px;
+    }
 }
 
 @media (min-width: 1200px){
     body > header > .nav, body > footer > .nav{
-        padding:5px 8px;
         height:40px;
+    }
+    
+    body > header > .nav .glyphicon{
+        padding:5px 8px;
+    }
+    
+    body > header > .nav h1{
+        margin-top:10px;
+        font-size:24px;
     }
     
     div#container > div.wrapper{
         padding:6px 40px;
+    }
+    
+    .nav .info{
+        top:-2px;
     }
 }

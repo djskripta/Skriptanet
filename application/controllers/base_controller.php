@@ -7,6 +7,7 @@
 class Base_controller extends CI_Controller {
     private $data;
     private $access;
+    private $nav_links;
     
     public function __construct(){
         parent::__construct();
@@ -26,12 +27,17 @@ class Base_controller extends CI_Controller {
         $content = ob_get_clean();
         
         //insert the view into the template
-        if(!is_null($template)){
-            ob_start();
-            $this->load->view('templates/'.$template, $this->data);
-            $template_content = ob_get_clean();
+        if(!is_null($template)){	    
+	    $username = !isset($this->data['user_data']) ? '' : $this->data['user_data']['email'];
 	    
-            print str_replace('[%content%]',$content,$template_content);
+	    $replacements = array(
+		'content' => $content,
+		'username' => $username,
+		'title' => $this->data['title'],
+		'nav_links' => $this->data['nav_links'],
+	    );
+	    
+	    $this->load->view('templates/'.$template, $replacements);
             return;
         }
         

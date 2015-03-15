@@ -4,6 +4,7 @@ class User_model extends Core_model{
     public function __construct(){
 	$this->name = 'User';
         $this->table = 'users';
+	$this->display_key = 'email';
 	$this->schema = array();
 	
 	$field = new fieldSchema('id', 'int(11)', false, 'PRI', null, 'auto_increment');
@@ -38,6 +39,8 @@ class User_model extends Core_model{
 	    'identity_id' => array('identity_id'),
 	    'email' => array('email'),
 	);
+	
+	$this->external_schema['project'] = array('id' => 'user_id');
         
         parent::__construct();
     }
@@ -109,7 +112,7 @@ class User_model extends Core_model{
     }
     
     public function _callback_permission_bit($field, $data){
-	
+	return $data[$field];
     }
 }
 ?>

@@ -11,6 +11,7 @@ class Core_model extends CI_Model{
     public $database = 'moneytree';
     protected $table;
     protected $schema;
+    protected $external_schema = array();
     protected $schema_constraints;
     protected $indexes;
     protected $unique_indexes;
@@ -355,9 +356,7 @@ class Core_model extends CI_Model{
 	    $parsers = $this->global_parsers + $field->parsers;
 	    
 	    foreach($parsers as $callback){
-		$res = $this->_handle_config_callback($callback, $field);
-		if(empty($res)) continue;
-		
+		$res = $this->_handle_config_callback($callback, $field);		
 		$this->data[$field->name] = $res;
 	    }
 	}
@@ -404,6 +403,35 @@ class Core_model extends CI_Model{
 	return $this->schema;
     }
     
+    public function get_table(){
+	return $this->table;
+    }
+    
+    public function get_external_schema(){
+	return $this->external_schema;
+    }
+    
+    /**
+     * Return links to related entities
+     * 
+     * @param mixed $model
+     * @param array $parent_entity
+     * @param string $key
+     * @param string $foreign_key
+     * @return array
+     */
+    public function get_linked_entities($parent_entity, $parent_key, $key, $path = ''){
+	$parsed_values = array();
+	$linked_entities = $this->get_by_key($key, $parent_entity[$parent_key]);
+
+	foreach($linked_entities as $entity){
+	    $entity_url = $path.'/'.$this->table.'/view/'.$entity[$this->primary_key];
+	    $parsed_values[] = '<a href="'.$entity_url.'">'.$entity[$this->display_key].'</a>';
+	}
+
+	return $parsed_values;
+    }
+    
     public function get($where = array(), $limit = 10, $order_by = 'id DESC'){
 	$where_strings = array();
 	foreach($where as $key => $value){
@@ -429,8 +457,12 @@ class Core_model extends CI_Model{
 	. "LIMIT {$limit}")->result_array();
     }
     
-    public function get_by_id()
+    public function get_by_id($id = NULL)
     {
+	if($id !== NULL){
+	    $this->data[$this->primary_key] = $id;
+	}
+	
 	$this->entity = array();
 	if(!isset($this->data[$this->primary_key])){
 	    return array();
@@ -448,11 +480,18 @@ class Core_model extends CI_Model{
         return array();
     }
     
+    public function get_by_key($key, $value)
+    {
+	return $this->get(array($key => $value));
+    }
+    
     public function insert()
     {
         if($this->ready_state !== self::READY_STATE_VALID){
             throw new Exception('Data not validated', E_NOTICE);
         }
+	
+	var_dump($this->data);
         
         $this->db->insert($this->table, $this->data);
         $this->ready_state = self::READY_STATE_DONE;

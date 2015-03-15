@@ -23,6 +23,7 @@ class Login extends Mgmt_base {
 	    return;
 	}
 	
+	$this->set('title','Log In');
 	$this->load_view('mgmt/login');
     }
     

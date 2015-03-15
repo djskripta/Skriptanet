@@ -20,7 +20,6 @@ class Session_model extends Core_model{
     public function _map() {
         parent::_map();
     }
-    
 
     public function check_access($page){
         //make sure the user has access to the page
